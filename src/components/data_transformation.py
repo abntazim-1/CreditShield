@@ -14,6 +14,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from src.exception import CustomException, DataValidationError, FeatureEngineeringError
 from src.logger import get_logger
 from src.utils import save_object
+from src.components.imbalance_handler import ImbalanceHandler, ImbalanceConfig
 
 # Initialize logger
 logger = get_logger(__name__)
@@ -24,8 +25,9 @@ class DataTransformationConfig:
     """Configuration class for data transformation parameters."""
     
     preprocessor_obj_file_path: str = os.path.join("artifacts", "preprocessor.pkl")
-    train_data_path: str = os.path.join("artifacts", "train.csv")      
-    test_data_path: str = os.path.join("artifacts", "test.csv")  
+    train_data_path: str = os.path.join('artifacts', 'train.csv')
+    test_data_path: str = os.path.join('artifacts', 'test.csv')
+
     
     # Imputation settings
     numeric_imputation_strategy: str = "mean"  # mean, median, constant
@@ -46,6 +48,11 @@ class DataTransformationConfig:
     # Data validation settings
     min_samples: int = 100
     max_missing_ratio: float = 0.5
+    
+    # Imbalance handling settings
+    handle_imbalance: bool = True
+    imbalance_technique: str = "SMOTE"  # SMOTE, ADASYN, RandomOverSampler, etc.
+    imbalance_strategy: str = "auto"  # auto, oversample, undersample, combine, none
 
 
 class MeanImputer(BaseEstimator, TransformerMixin):
@@ -345,7 +352,7 @@ class DataTransformation:
             test_df = self._remove_duplicates(test_df)
             
             # Assuming target column is the last column
-            target_column_name = train_df.columns[-1]
+            target_column_name = "loan_status"
             logger.info(f"Target column identified: {target_column_name}")
             
             # Separate features and target
@@ -369,6 +376,27 @@ class DataTransformation:
             
             logger.info("Transforming test data")
             input_feature_test_arr = preprocessing_pipeline.transform(input_feature_test_df)
+            
+            # Handle class imbalance if enabled
+            if self.transformation_config.handle_imbalance:
+                logger.info("Checking for class imbalance")
+                
+                imbalance_config = ImbalanceConfig(
+                    technique=self.transformation_config.imbalance_technique,
+                    resampling_strategy=self.transformation_config.imbalance_strategy
+                )
+                
+                imbalance_handler = ImbalanceHandler(imbalance_config)
+                
+                # Apply resampling to training data only
+                input_feature_train_arr, target_feature_train_resampled, imbalance_info = imbalance_handler.apply_resampling(
+                    input_feature_train_arr, target_feature_train_df
+                )
+                
+                if imbalance_info["resampling_applied"]:
+                    logger.info(f"Resampling applied: {imbalance_info['technique']}")
+                    logger.info(f"Training data shape changed: {imbalance_info['original_shape']} → {imbalance_info['new_shape']}")
+                    target_feature_train_df = target_feature_train_resampled
             
             # Combine features and target
             train_arr = np.c_[input_feature_train_arr, np.array(target_feature_train_df)]
