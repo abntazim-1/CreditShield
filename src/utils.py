@@ -12,6 +12,7 @@ import json
 import yaml
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Union, Tuple
+import time
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
@@ -331,6 +332,9 @@ def evaluate_models(
     try:
         model_reports = {}
         
+        n_train, n_features = X_train.shape
+        n_test = X_test.shape[0]
+
         for model_name, model in models.items():
             logger.info(f"Evaluating model: {model_name}")
             
@@ -345,18 +349,24 @@ def evaluate_models(
                     n_jobs=n_jobs,
                     verbose=0
                 )
+                fit_start = time.time()
                 grid_search.fit(X_train, y_train)
+                fit_time_sec = time.time() - fit_start
                 best_model = grid_search.best_estimator_
                 logger.info(f"Best parameters for {model_name}: {grid_search.best_params_}")
             else:
                 best_model = model
+                fit_start = time.time()
                 best_model.fit(X_train, y_train)
+                fit_time_sec = time.time() - fit_start
             
             # Cross-validation score
             cv_scores = cross_val_score(best_model, X_train, y_train, cv=cv_folds, scoring=scoring, n_jobs=n_jobs)
             
             # Test predictions
+            pred_start = time.time()
             y_pred = best_model.predict(X_test)
+            predict_time_sec = time.time() - pred_start
             
             # Get prediction probabilities if available (for classification)
             y_pred_proba = None
@@ -378,7 +388,12 @@ def evaluate_models(
             metrics.update({
                 'cv_mean': cv_scores.mean(),
                 'cv_std': cv_scores.std(),
-                'cv_scores': cv_scores.tolist()
+                'cv_scores': cv_scores.tolist(),
+                'fit_time_sec': float(fit_time_sec),
+                'predict_time_sec': float(predict_time_sec),
+                'n_train_samples': int(n_train),
+                'n_test_samples': int(n_test),
+                'n_features': int(n_features)
             })
             
             model_reports[model_name] = metrics
@@ -442,6 +457,47 @@ def get_best_model(
             "Error finding best model",
             error_detail=e,
             context={"metric": metric, "models": list(model_reports.keys())}
+        )
+
+
+def generate_model_report(
+    model_reports: Dict[str, Dict[str, float]],
+    sort_by: str = 'accuracy',
+    ascending: bool = False,
+    save_path: Optional[str] = os.path.join('artifacts', 'model_report.csv')
+) -> pd.DataFrame:
+    """
+    Convert model_reports into a tidy DataFrame, sort by a metric, and optionally save as CSV.
+
+    Args:
+        model_reports: Output of evaluate_models
+        sort_by: Metric column to sort by
+        ascending: Sort order
+        save_path: If provided, CSV will be saved at this path
+
+    Returns:
+        Pandas DataFrame with one row per model and metrics as columns
+    """
+    try:
+        if not model_reports:
+            raise ValueError("Empty model_reports provided")
+
+        df = pd.DataFrame.from_dict(model_reports, orient='index')
+        df.index.name = 'model'
+        if sort_by in df.columns:
+            df = df.sort_values(by=sort_by, ascending=ascending)
+
+        if save_path:
+            ensure_dir(save_path)
+            df.to_csv(save_path)
+            logger.info(f"Model report saved to {save_path}")
+
+        return df
+    except Exception as e:
+        raise ModelTrainingError(
+            "Error generating model report",
+            error_detail=e,
+            context={"sort_by": sort_by, "save_path": save_path}
         )
 
 

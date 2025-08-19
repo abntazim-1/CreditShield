@@ -315,7 +315,7 @@ class DataTransformation:
         
         return Pipeline(steps)
     
-    def initiate_data_transformation(self, train_path: str, test_path: str) -> Tuple[np.ndarray, np.ndarray, str]:
+    def initiate_data_transformation(self, train_path: str, test_path: str) -> Tuple[np.ndarray, np.ndarray, str, List[str]]:
         """
         Initiate the data transformation process.
         
@@ -370,12 +370,30 @@ class DataTransformation:
             logger.info("Fitting preprocessor on training data")
             preprocessing_pipeline.fit(input_feature_train_df)
             
-            # Transform data
-            logger.info("Transforming training data")
-            input_feature_train_arr = preprocessing_pipeline.transform(input_feature_train_df)
+            # Extract feature names before scaling and then scale
+            logger.info("Extracting feature names before scaling")
+            # Build a pipeline of all steps except the final scaler to preserve DataFrame columns
+            pre_scaler_pipeline = Pipeline(preprocessing_pipeline.steps[:-1])
             
-            logger.info("Transforming test data")
-            input_feature_test_arr = preprocessing_pipeline.transform(input_feature_test_df)
+            logger.info("Transforming training data (pre-scaler)")
+            features_train_df = pre_scaler_pipeline.transform(input_feature_train_df)
+            logger.info("Transforming test data (pre-scaler)")
+            features_test_df = pre_scaler_pipeline.transform(input_feature_test_df)
+
+            # Capture transformed feature names
+            if isinstance(features_train_df, pd.DataFrame):
+                transformed_feature_names: List[str] = features_train_df.columns.tolist()
+            else:
+                # Fallback: if a numpy array is returned unexpectedly
+                transformed_feature_names = [f"feature_{i}" for i in range(features_train_df.shape[1])]  # type: ignore
+
+            # Scale features using the already-fitted scaler in the full pipeline
+            logger.info("Applying scaler to transformed features")
+            scaler = preprocessing_pipeline.named_steps.get('scaler')
+            if scaler is None:
+                raise FeatureEngineeringError("Scaler step not found in preprocessing pipeline")
+            input_feature_train_arr = scaler.transform(features_train_df)
+            input_feature_test_arr = scaler.transform(features_test_df)
             
             # Handle class imbalance if enabled
             if self.transformation_config.handle_imbalance:
@@ -417,7 +435,8 @@ class DataTransformation:
             return (
                 train_arr,
                 test_arr,
-                self.transformation_config.preprocessor_obj_file_path
+                self.transformation_config.preprocessor_obj_file_path,
+                transformed_feature_names + [target_column_name]
             )
             
         except Exception as e:

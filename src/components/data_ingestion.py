@@ -9,9 +9,9 @@ from sklearn.model_selection import train_test_split
 
 from src.exception import CustomException, DataLoadingError, DataValidationError
 from src.logger import get_logger
-#from src.components.data_transformation import DataTransformation, DataTransformationConfig
-#from src.components.model_trainer import ModelTrainer, ModelTrainerConfig
-#from src.utils import evaluate_models, save_object
+from src.components.data_transformation import DataTransformation
+from src.utils import save_object, evaluate_models
+from src.components.model_trainer import ModelTrainer
 
 # Initialize logger
 logger = get_logger(__name__)
@@ -215,12 +215,11 @@ class DataIngestion:
 
 
 if __name__ == "__main__":
-    try:
-        # Simple execution for testing
-        obj = DataIngestion()
-        train_data, test_data = obj.initiate_data_ingestion()
-        logger.info("Data ingestion test completed successfully")
-        
-    except Exception as e:
-        logger.error(f"Data ingestion test failed: {str(e)}")
-        sys.exit(1)
+    
+    obj=DataIngestion()
+    train_data_path, test_data_path = obj.initiate_data_ingestion() 
+    data_transformation = DataTransformation()
+    train_arr, test_arr, _, transformed_columns = data_transformation.initiate_data_transformation(train_data_path, test_data_path)
+    
+    modeltrainer = ModelTrainer()
+    print(modeltrainer.initiate_model_trainer(train_arr, test_arr, transformed_columns)) 
