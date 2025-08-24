@@ -18,6 +18,7 @@ def get_version():
             return locals()["__version__"]
     return "0.1.0"
 
+
 def get_requirements(path="requirements.txt"):
     """Parse requirements file with error handling"""
     req_path = os.path.join(here, path)
@@ -28,11 +29,18 @@ def get_requirements(path="requirements.txt"):
         requirements = []
         for line in f:
             line = line.strip()
-            # Skip empty lines, comments, and pip options
-            if line and not line.startswith("#") and not line.startswith("-"):
-                # Handle requirements with version specifiers
+            # Skip empty lines, comments, pip options, and editable installs
+            if (
+                line
+                and not line.startswith("#")
+                and not line.startswith("-r")
+                and not line.startswith("-e")
+                and not line.startswith("--editable")
+                and not line.startswith("-")
+            ):
                 requirements.append(line)
         return requirements
+
 
 setup(
     name="credit-risk-project",  # Use hyphens in package names

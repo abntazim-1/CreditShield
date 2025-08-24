@@ -139,7 +139,7 @@ class CategoricalEncoder(BaseEstimator, TransformerMixin):
 class KMeansBinner(BaseEstimator, TransformerMixin):
     """Custom transformer for K-means based binning."""
     
-    def __init__(self, columns: List[str], n_bins: int = 5, random_state: int = 42, 
+    def __init__(self, columns: List[str], n_bins: int = 4, random_state: int = 42, 
                  replace: bool = False, verbose: bool = False):
         self.columns = columns
         self.n_bins = n_bins
@@ -451,11 +451,11 @@ class DataTransformation:
             )
 
 
-if __name__ == "__main__":
-    config = DataTransformationConfig()
-    data_transformation = DataTransformation(config)
-    train_arr, test_arr, preprocessor_path = data_transformation.initiate_data_transformation(
-        config.train_data_path, config.test_data_path
-    )
+# if __name__ == "__main__":
+#     config = DataTransformationConfig()
+#     data_transformation = DataTransformation(config)
+#     train_arr, test_arr, preprocessor_path = data_transformation.initiate_data_transformation(
+#         config.train_data_path, config.test_data_path
+#     )
 
-    print(f"Preprocessor created at: {preprocessor_path}")
+#     print(f"Preprocessor created at: {preprocessor_path}")

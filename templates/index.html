@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Risk Prediction System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .form-header h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid #4facfe;
+        }
+
+        .form-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-section h3::before {
+            content: "📊";
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+
+        .personal-info h3::before { content: "👤"; }
+        .loan-info h3::before { content: "💰"; }
+        .credit-info h3::before { content: "📈"; }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .form-group input:hover,
+        .form-group select:hover {
+            border-color: #4facfe;
+        }
+
+        .submit-section {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: #e8f5e8;
+            border-radius: 15px;
+            border-left: 4px solid #28a745;
+            display: none;
+        }
+
+        .result-section h3 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+
+        .result-text {
+            font-size: 1.1rem;
+            color: #155724;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        .info-banner {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Credit Risk Prediction System</h1>
+            <p>Advanced AI-powered credit risk assessment for informed lending decisions</p>
+        </div>
+
+        <div class="info-banner">
+            <p>🔒 Secure • 🚀 Fast • 📊 Accurate • Enter applicant details below to assess credit risk</p>
+        </div>
+
+        <div class="main-content">
+            <div class="form-header">
+                <h2>Credit Risk Assessment Form</h2>
+                <p>Please fill in all required information for accurate risk prediction</p>
+            </div>
+
+            <div class="form-container">
+                <form id="creditRiskForm">
+                    <div class="form-grid">
+                        <!-- Personal Information Section -->
+                        <div class="form-section personal-info">
+                            <h3>Personal Information</h3>
+                            
+                            <div class="form-group">
+                                <label for="person_age">Age (years)</label>
+                                <input type="number" id="person_age" name="person_age" min="18" max="100" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="person_income">Annual Income ($)</label>
+                                <input type="number" id="person_income" name="person_income" min="0" step="1000" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="person_home_ownership">Home Ownership</label>
+                                <select id="person_home_ownership" name="person_home_ownership" required>
+                                    <option value="">Select ownership type</option>
+                                    <option value="RENT">Rent</option>
+                                    <option value="OWN">Own</option>
+                                    <option value="MORTGAGE">Mortgage</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="person_emp_length">Employment Length (years)</label>
+                                <input type="number" id="person_emp_length" name="person_emp_length" min="0" max="50" step="0.1">
+                            </div>
+                        </div>
+
+                        <!-- Loan Information Section -->
+                        <div class="form-section loan-info">
+                            <h3>Loan Information</h3>
+                            
+                            <div class="form-group">
+                                <label for="loan_intent">Loan Purpose</label>
+                                <select id="loan_intent" name="loan_intent" required>
+                                    <option value="">Select loan purpose</option>
+                                    <option value="PERSONAL">Personal</option>
+                                    <option value="EDUCATION">Education</option>
+                                    <option value="MEDICAL">Medical</option>
+                                    <option value="VENTURE">Business Venture</option>
+                                    <option value="HOMEIMPROVEMENT">Home Improvement</option>
+                                    <option value="DEBTCONSOLIDATION">Debt Consolidation</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="loan_grade">Loan Grade</label>
+                                <select id="loan_grade" name="loan_grade" required>
+                                    <option value="">Select loan grade</option>
+                                    <option value="A">A (Excellent)</option>
+                                    <option value="B">B (Very Good)</option>
+                                    <option value="C">C (Good)</option>
+                                    <option value="D">D (Fair)</option>
+                                    <option value="E">E (Poor)</option>
+                                    <option value="F">F (Very Poor)</option>
+                                    <option value="G">G (High Risk)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="loan_amnt">Loan Amount ($)</label>
+                                <input type="number" id="loan_amnt" name="loan_amnt" min="500" max="50000" step="100" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="loan_int_rate">Interest Rate (%)</label>
+                                <input type="number" id="loan_int_rate" name="loan_int_rate" min="0" max="30" step="0.01">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="loan_percent_income">Loan as % of Income (%)</label>
+                                <input type="number" id="loan_percent_income" name="loan_percent_income" min="0" max="100" step="0.1" required>
+                                <small style="color: #666; font-size: 0.85rem;">Percentage of annual income the loan represents</small>
+                            </div>
+                        </div>
+
+                        <!-- Credit History Section -->
+                        <div class="form-section credit-info">
+                            <h3>Credit History</h3>
+                            
+                            <div class="form-group">
+                                <label for="cb_person_default_on_file">Previous Default on File</label>
+                                <select id="cb_person_default_on_file" name="cb_person_default_on_file" required>
+                                    <option value="">Select option</option>
+                                    <option value="Y">Yes</option>
+                                    <option value="N">No</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cb_person_cred_hist_length">Credit History Length (years)</label>
+                                <input type="number" id="cb_person_cred_hist_length" name="cb_person_cred_hist_length" min="0" max="50" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="submit-section">
+                        <button type="submit" class="submit-btn">
+                            🔍 Analyze Credit Risk
+                        </button>
+                        <p style="margin-top: 15px; color: #666; font-size: 0.9rem;">
+                            Results will be displayed instantly after submission
+                        </p>
+                    </div>
+                </form>
+
+                <div class="result-section" id="resultSection">
+                    <h3>📊 Credit Risk Assessment Result</h3>
+                    <div class="result-text" id="resultText">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 Credit Risk Prediction System. Advanced AI-powered financial risk assessment.</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('creditRiskForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show result section
+            const resultSection = document.getElementById('resultSection');
+            const resultText = document.getElementById('resultText');
+            
+            // Show processing message
+            resultText.innerHTML = '⏳ Processing your credit risk assessment...';
+            resultSection.style.display = 'block';
+            
+            // Get form data
+            const formData = new FormData(e.target);
+            
+            // Send request to Flask backend
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const riskAssessment = data.risk_assessment;
+                    
+                    // Reset result section styling
+                    resultSection.style.background = 'white';
+                    resultSection.style.borderColor = '#dee2e6';
+                    
+                    // Apply styling based on risk level
+                    if (riskAssessment.risk_level === 'MEDIUM RISK') {
+                        resultSection.style.background = '#fff3cd';
+                        resultSection.style.borderColor = '#ffc107';
+                    } else if (riskAssessment.risk_level === 'HIGH RISK') {
+                        resultSection.style.background = '#f8d7da';
+                        resultSection.style.borderColor = '#dc3545';
+                    }
+                    
+                    resultText.innerHTML = `
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: ${riskAssessment.risk_color}; margin-bottom: 15px;">
+                                ${riskAssessment.risk_level}
+                            </div>
+                            <div style="font-size: 1.2rem; margin-bottom: 10px;">
+                                Risk Score: ${riskAssessment.risk_score}
+                            </div>
+                            <div style="font-size: 1rem; color: #666; margin-bottom: 10px;">
+                                ${riskAssessment.recommendation}
+                            </div>
+                            <div style="font-size: 0.9rem; color: #888;">
+                                ${riskAssessment.confidence}
+                            </div>
+                            <div style="font-size: 0.8rem; color: #999; margin-top: 15px;">
+                                Analysis completed at: ${data.timestamp}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultText.innerHTML = `
+                        <div style="text-align: center; color: #dc3545;">
+                            <div style="font-size: 1.2rem; margin-bottom: 10px;">
+                                ❌ Error: ${data.error}
+                            </div>
+                            <div style="font-size: 0.9rem; color: #666;">
+                                Please check your inputs and try again.
+                            </div>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultText.innerHTML = `
+                    <div style="text-align: center; color: #dc3545;">
+                        <div style="font-size: 1.2rem; margin-bottom: 10px;">
+                            ❌ Network Error
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666;">
+                            Please check your connection and try again.
+                        </div>
+                    </div>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
