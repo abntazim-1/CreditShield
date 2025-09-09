@@ -427,5 +427,5 @@ def detect_and_handle_imbalance(
     return handler.apply_resampling(X, y)
 
 
-if __name__ == "__main__":
-    logger.info("Imbalance handler module loaded successfully")
+    if __name__ == "__main__":
+        logger.info("Imbalance handler module loaded successfully")
